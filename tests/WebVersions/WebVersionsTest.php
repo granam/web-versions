@@ -5,6 +5,7 @@ namespace Granam\Tests\WebVersions;
 use Granam\WebVersions\WebVersions;
 use Granam\Git\Git;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Process;
 
 class WebVersionsTest extends TestCase
 {
@@ -14,7 +15,7 @@ class WebVersionsTest extends TestCase
     public function I_can_get_last_unstable_version(): void
     {
         $webVersions = new WebVersions(new Git(), 'some repository dir');
-        self::assertSame('master', $webVersions->getLastUnstableVersion(), 'Expected master as a default unstable version');
+        self::assertSame('main', $webVersions->getLastUnstableVersion(), 'Expected main as a default unstable version');
         $webVersions = new WebVersions(new Git(), 'some repository dir', 'mistress');
         self::assertSame('mistress', $webVersions->getLastUnstableVersion(), 'Expected given last unstable version to be given back');
     }
@@ -60,17 +61,18 @@ class WebVersionsTest extends TestCase
      * @dataProvider provideLastStableVersion
      * @param string|null $lastStableMinorVersion
      * @param string $lastUnstableVersion
-     * @param string $expectedLastStableMinorVersion
+     * @param string|null $expectedLastStableMinorVersion
      */
     public function I_can_get_last_stable_minor_version(
         ?string $lastStableMinorVersion,
         string $lastUnstableVersion,
-        string $expectedLastStableMinorVersion
+        ?string $expectedLastStableMinorVersion
     ): void
     {
+        $dir = 'some repository dir';
         $webVersions = new WebVersions(
-            $this->createGitWithLastStableMinorVersion('some repository dir', $lastStableMinorVersion),
-            'some repository dir',
+            $this->createGitWithLastStableMinorVersion($dir, $lastStableMinorVersion),
+            $dir,
             $lastUnstableVersion
         );
         self::assertSame($expectedLastStableMinorVersion, $webVersions->getLastStableMinorVersion());
@@ -80,7 +82,7 @@ class WebVersionsTest extends TestCase
     {
         return [
             'some minor version' => ['2.1', 'mistress', '2.1'],
-            'only unstable version' => [null, 'mistress', 'mistress'],
+            'only unstable version' => [null, 'mistress', null],
         ];
     }
 
@@ -98,10 +100,22 @@ class WebVersionsTest extends TestCase
 
             public function getLastStableMinorVersion(string $dir, bool $readLocal = self::INCLUDE_LOCAL_BRANCHES, bool $readRemote = self::INCLUDE_REMOTE_BRANCHES): ?string
             {
-                TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
                 TestCase::assertSame($this->expectedRepositoryDir, $dir);
 
                 return $this->lastStableVersion;
+            }
+
+            public function getAllMinorVersions(
+                string $repositoryDir,
+                bool $readLocal = self::INCLUDE_LOCAL_BRANCHES,
+                bool $readRemote = self::INCLUDE_REMOTE_BRANCHES
+            ): array
+            {
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
+
+                return [$this->lastStableVersion];
             }
 
         };
@@ -112,12 +126,12 @@ class WebVersionsTest extends TestCase
      * @dataProvider provideLastStablePatchVersion
      * @param string|null $lastStablePatchVersion
      * @param string $lastUnstableVersion
-     * @param string $expectedLastStablePatchVersion
+     * @param string|null $expectedLastStablePatchVersion
      */
     public function I_can_get_last_stable_patch_version(
         ?string $lastStablePatchVersion,
         string $lastUnstableVersion,
-        string $expectedLastStablePatchVersion
+        ?string $expectedLastStablePatchVersion
     ): void
     {
         $webVersions = new WebVersions(
@@ -132,11 +146,11 @@ class WebVersionsTest extends TestCase
     {
         return [
             'some patch version' => ['2.1.1', 'mistress', '2.1.1'],
-            'only unstable version' => ['mistress', 'mistress', 'mistress'],
+            'only unstable version' => [null, 'mistress', null],
         ];
     }
 
-    private function createGitWithLastStablePatchVersion(string $expectedRepositoryDir, string $lastPatchVersion): Git
+    private function createGitWithLastStablePatchVersion(string $expectedRepositoryDir, ?string $lastPatchVersion): Git
     {
         return new class($expectedRepositoryDir, $lastPatchVersion) extends Git {
             private $expectedRepositoryDir;
@@ -148,7 +162,7 @@ class WebVersionsTest extends TestCase
                 $this->lastPatchVersion = $lastPatchVersion;
             }
 
-            public function getLastPatchVersion(string $dir): string
+            public function getLastPatchVersion(string $dir): ?string
             {
                 TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
                 TestCase::assertSame($this->expectedRepositoryDir, $dir);
@@ -164,9 +178,11 @@ class WebVersionsTest extends TestCase
      */
     public function I_can_get_all_stable_minor_versions(): void
     {
+        $minorVersions = ['2.0', '1.2', '1.1', '1.0'];
         $webVersions = new WebVersions(
-            $this->createGitWithAllMinorVersions('some repository dir', $minorVersions = ['2.0', '1.2', '1.1', '1.0']),
-            'some repository dir'
+            $this->createGitWithAllMinorVersions('some repository dir', $minorVersions),
+            'some repository dir',
+            'mistress'
         );
         self::assertSame($minorVersions, $webVersions->getAllStableMinorVersions());
     }
@@ -186,17 +202,6 @@ class WebVersionsTest extends TestCase
         }
         self::assertTrue($webVersions->hasMinorVersion('mistress'));
         self::assertFalse($webVersions->hasMinorVersion('nonsense'));
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_version_human_name(): void
-    {
-        $web = new WebVersions(new Git(), 'some repository dir', 'mistress');
-        self::assertSame('verze 1.0', $web->getVersionHumanName('1.0'));
-        self::assertSame('verze the last of first version', $web->getVersionHumanName('the last of first version'));
-        self::assertSame('testovací!', $web->getVersionHumanName('mistress'));
     }
 
     /**
@@ -306,11 +311,57 @@ class WebVersionsTest extends TestCase
     /**
      * @test
      */
-    public function I_can_ask_it_if_code_has_specific_version(): void
+    public function I_can_ask_it_if_code_has_specific_minor_version(): void
     {
-        $webVersions = new WebVersions(new Git(), __DIR__);
+        $dir = 'some repository dir';
+        $git = $this->createGitWithLastStableMinorVersion($dir, '123.456');
+        $webVersions = new WebVersions($git, $dir);
         self::assertTrue($webVersions->hasMinorVersion($webVersions->getLastUnstableVersion()));
         self::assertTrue($webVersions->hasMinorVersion($webVersions->getLastStableMinorVersion()));
         self::assertFalse($webVersions->hasMinorVersion('-1'));
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_empty_array_as_a_list_of_stable_minor_versions_on_repo_without_versions()
+    {
+        $testDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable minor versions ', true);
+        if (!@mkdir($testDir)) {
+            self::fail("Can not create dir '$testDir'");
+        }
+        try {
+            $gitInit = new Process(['git', 'init'], $testDir);
+            $exitStatus = $gitInit->run();
+            self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
+
+            // intentionally a real Git repo to see if there is some exception surprise
+            $webVersions = new WebVersions(new Git(), $testDir);
+            self::assertSame([], $webVersions->getAllStableMinorVersions());
+        } finally {
+            exec(sprintf('rm -fr %s', escapeshellarg($testDir)));
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_empty_array_as_a_list_of_stable_patch_versions_on_repo_without_versions()
+    {
+        $testDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable patch versions ', true);
+        if (!@mkdir($testDir)) {
+            self::fail("Can not create dir '$testDir'");
+        }
+        try {
+            $gitInit = new Process(['git', 'init'], $testDir);
+            $exitStatus = $gitInit->run();
+            self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
+
+            // intentionally a real Git repo to see if there is some exception surprise
+            $webVersions = new WebVersions(new Git(), $testDir);
+            self::assertSame([], $webVersions->getAllStablePatchVersions());
+        } finally {
+            exec(sprintf('rm -fr %s', escapeshellarg($testDir)));
+        }
     }
 }
