@@ -9,6 +9,16 @@ use Symfony\Component\Process\Process;
 
 class WebVersionsTest extends TestCase
 {
+
+    private $temporaryDir;
+
+    protected function tearDown(): void
+    {
+        if ($this->temporaryDir) {
+            exec(sprintf('rm -fr %s', escapeshellarg($this->temporaryDir)));
+        }
+    }
+
     /**
      * @test
      */
@@ -326,21 +336,17 @@ class WebVersionsTest extends TestCase
      */
     public function I_get_empty_array_as_a_list_of_stable_minor_versions_on_repo_without_versions()
     {
-        $testDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable minor versions ', true);
-        if (!@mkdir($testDir)) {
-            self::fail("Can not create dir '$testDir'");
+        $this->temporaryDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable minor versions ', true);
+        if (!@mkdir($this->temporaryDir)) {
+            self::fail("Can not create dir '$this->temporaryDir'");
         }
-        try {
-            $gitInit = new Process(['git', 'init'], $testDir);
-            $exitStatus = $gitInit->run();
-            self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
+        $gitInit = new Process(['git', 'init'], $this->temporaryDir);
+        $exitStatus = $gitInit->run();
+        self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
 
-            // intentionally a real Git repo to see if there is some exception surprise
-            $webVersions = new WebVersions(new Git(), $testDir);
-            self::assertSame([], $webVersions->getAllStableMinorVersions());
-        } finally {
-            exec(sprintf('rm -fr %s', escapeshellarg($testDir)));
-        }
+        // intentionally a real Git repo to see if there is some exception surprise
+        $webVersions = new WebVersions(new Git(), $this->temporaryDir);
+        self::assertSame([], $webVersions->getAllStableMinorVersions());
     }
 
     /**
@@ -348,20 +354,16 @@ class WebVersionsTest extends TestCase
      */
     public function I_get_empty_array_as_a_list_of_stable_patch_versions_on_repo_without_versions()
     {
-        $testDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable patch versions ', true);
-        if (!@mkdir($testDir)) {
-            self::fail("Can not create dir '$testDir'");
+        $this->temporaryDir = sys_get_temp_dir() . '/' . uniqid('testing dir to get Git repo without stable patch versions ', true);
+        if (!@mkdir($this->temporaryDir)) {
+            self::fail("Can not create dir '$this->temporaryDir'");
         }
-        try {
-            $gitInit = new Process(['git', 'init'], $testDir);
-            $exitStatus = $gitInit->run();
-            self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
+        $gitInit = new Process(['git', 'init'], $this->temporaryDir);
+        $exitStatus = $gitInit->run();
+        self::assertSame(0, $exitStatus, sprintf('Can not initialize testing Git repository: %s', $gitInit->getErrorOutput()));
 
-            // intentionally a real Git repo to see if there is some exception surprise
-            $webVersions = new WebVersions(new Git(), $testDir);
-            self::assertSame([], $webVersions->getAllStablePatchVersions());
-        } finally {
-            exec(sprintf('rm -fr %s', escapeshellarg($testDir)));
-        }
+        // intentionally a real Git repo to see if there is some exception surprise
+        $webVersions = new WebVersions(new Git(), $this->temporaryDir);
+        self::assertSame([], $webVersions->getAllStablePatchVersions());
     }
 }
