@@ -278,11 +278,11 @@ class WebVersionsTest extends TestCase
     public function I_can_get_all_patch_versions(): void
     {
         $webVersions = new WebVersions(
-            $this->createGitWithAllPatchVersions('some repository dir', $patchVersions = ['2.0.5', '1.1.0', '1.0.976']),
+            $this->createGitWithAllPatchVersions('some repository dir', ['2.0.5', '1.1.0', '1.0.976']),
             'some repository dir',
             'mistress'
         );
-        self::assertSame($patchVersions, $webVersions->getAllPatchVersions());
+        self::assertSame(['mistress', '2.0.5', '1.1.0', '1.0.976'], $webVersions->getAllPatchVersions());
     }
 
     private function createGitWithAllPatchVersions(string $expectedRepositoryDir, array $mockPatchVersions): Git

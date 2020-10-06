@@ -33,9 +33,9 @@ class WebVersions extends StrictObject
      */
     public function getAllMinorVersions(): array
     {
-        $allStableMinorVersions = $this->getAllStableMinorVersions();
-        array_unshift($allStableMinorVersions, $this->getLastUnstableVersion());
-        return $allStableMinorVersions;
+        $minorVersions = $this->getAllStableMinorVersions();
+        array_unshift($minorVersions, $this->getLastUnstableVersion());
+        return $minorVersions;
     }
 
     /**
@@ -45,6 +45,16 @@ class WebVersions extends StrictObject
     public function getAllStableMinorVersions(): array
     {
         return $this->git->getAllMinorVersions($this->repositoryDir);
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getAllPatchVersions(): array
+    {
+        $patchVersions = $this->getAllStablePatchVersions();
+        array_unshift($patchVersions, $this->getLastUnstableVersion());
+        return $patchVersions;
     }
 
     /**
@@ -91,13 +101,5 @@ class WebVersions extends StrictObject
             return $superiorVersion;
         }
         return $this->git->getLastPatchVersionOf($superiorVersion, $this->repositoryDir);
-    }
-
-    /**
-     * @return array|string[]
-     */
-    public function getAllPatchVersions(): array
-    {
-        return $this->git->getAllPatchVersions($this->repositoryDir);
     }
 }
