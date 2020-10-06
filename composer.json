@@ -1,6 +1,7 @@
 {
     "name": "granam/web-versions",
-    "description": "Reads available minor and patch versions of a web files repository",
+    "description": "Reads available minor and patch versions from a Git repository",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Granam\\": "src/"
