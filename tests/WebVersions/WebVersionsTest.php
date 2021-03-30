@@ -45,20 +45,22 @@ class WebVersionsTest extends TestCase
 
     private function createGitWithAllMinorVersions(string $expectedRepositoryDir, array $mockMinorVersions): Git
     {
-        return new class($expectedRepositoryDir, $mockMinorVersions) extends Git {
+        return new class($expectedRepositoryDir, $mockMinorVersions) extends Git
+        {
             private $expectedRepositoryDir;
             private $mockVersions;
 
             public function __construct(string $expectedRepositoryDir, array $mockVersions)
             {
+                parent::__construct();
                 $this->expectedRepositoryDir = $expectedRepositoryDir;
                 $this->mockVersions = $mockVersions;
             }
 
-            public function getAllMinorVersions(string $dir, bool $readLocal = self::INCLUDE_LOCAL_BRANCHES, bool $readRemote = self::INCLUDE_REMOTE_BRANCHES): array
+            public function getAllMinorVersions(string $repositoryDir, bool $readLocal = self::INCLUDE_LOCAL_BRANCHES, bool $readRemote = self::INCLUDE_REMOTE_BRANCHES): array
             {
-                TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
-                TestCase::assertSame($this->expectedRepositoryDir, $dir);
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
 
                 return $this->mockVersions;
             }
@@ -98,20 +100,22 @@ class WebVersionsTest extends TestCase
 
     private function createGitWithLastStableMinorVersion(string $expectedRepositoryDir, ?string $lastStableVersion): Git
     {
-        return new class($expectedRepositoryDir, $lastStableVersion) extends Git {
+        return new class($expectedRepositoryDir, $lastStableVersion) extends Git
+        {
             private $expectedRepositoryDir;
             private $lastStableVersion;
 
             public function __construct(string $expectedRepositoryDir, ?string $lastStableVersion)
             {
+                parent::__construct();
                 $this->expectedRepositoryDir = $expectedRepositoryDir;
                 $this->lastStableVersion = $lastStableVersion;
             }
 
-            public function getLastStableMinorVersion(string $dir, bool $readLocal = self::INCLUDE_LOCAL_BRANCHES, bool $readRemote = self::INCLUDE_REMOTE_BRANCHES): ?string
+            public function getLastStableMinorVersion(string $repositoryDir, bool $readLocal = self::INCLUDE_LOCAL_BRANCHES, bool $readRemote = self::INCLUDE_REMOTE_BRANCHES): ?string
             {
                 TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
-                TestCase::assertSame($this->expectedRepositoryDir, $dir);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
 
                 return $this->lastStableVersion;
             }
@@ -162,20 +166,22 @@ class WebVersionsTest extends TestCase
 
     private function createGitWithLastStablePatchVersion(string $expectedRepositoryDir, ?string $lastPatchVersion): Git
     {
-        return new class($expectedRepositoryDir, $lastPatchVersion) extends Git {
+        return new class($expectedRepositoryDir, $lastPatchVersion) extends Git
+        {
             private $expectedRepositoryDir;
             private $lastPatchVersion;
 
             public function __construct(string $expectedRepositoryDir, ?string $lastPatchVersion)
             {
+                parent::__construct();
                 $this->expectedRepositoryDir = $expectedRepositoryDir;
                 $this->lastPatchVersion = $lastPatchVersion;
             }
 
-            public function getLastPatchVersion(string $dir): ?string
+            public function getLastPatchVersion(string $repositoryDir): ?string
             {
-                TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
-                TestCase::assertSame($this->expectedRepositoryDir, $dir);
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
 
                 return $this->lastPatchVersion;
             }
@@ -254,7 +260,8 @@ class WebVersionsTest extends TestCase
         string $lastPatchVersion
     ): Git
     {
-        return new class($expectedRepositoryDir, $expectedSuperiorVersion, $lastPatchVersion) extends Git {
+        return new class($expectedRepositoryDir, $expectedSuperiorVersion, $lastPatchVersion) extends Git
+        {
             private $expectedRepositoryDir;
             private $expectedSuperiorVersion;
             private $lastPatchVersion;
@@ -265,16 +272,17 @@ class WebVersionsTest extends TestCase
                 ?string $lastPatchVersion
             )
             {
+                parent::__construct();
                 $this->expectedRepositoryDir = $expectedRepositoryDir;
                 $this->expectedSuperiorVersion = $expectedSuperiorVersion;
                 $this->lastPatchVersion = $lastPatchVersion;
             }
 
-            public function getLastPatchVersionOf(string $superiorVersion, string $dir): string
+            public function getLastPatchVersionOf(string $superiorVersion, string $repositoryDir): string
             {
-                TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
                 TestCase::assertSame($this->expectedSuperiorVersion, $superiorVersion);
-                TestCase::assertSame($this->expectedRepositoryDir, $dir);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
 
                 return $this->lastPatchVersion;
             }
@@ -297,20 +305,22 @@ class WebVersionsTest extends TestCase
 
     private function createGitWithAllPatchVersions(string $expectedRepositoryDir, array $mockPatchVersions): Git
     {
-        return new class($expectedRepositoryDir, $mockPatchVersions) extends Git {
+        return new class($expectedRepositoryDir, $mockPatchVersions) extends Git
+        {
             private $expectedRepositoryDir;
             private $mockPatchVersions;
 
             public function __construct(string $expectedRepositoryDir, array $mockPatchVersions)
             {
+                parent::__construct();
                 $this->expectedRepositoryDir = $expectedRepositoryDir;
                 $this->mockPatchVersions = $mockPatchVersions;
             }
 
-            public function getAllPatchVersions(string $dir): array
+            public function getAllPatchVersions(string $repositoryDir): array
             {
-                TestCase::assertTrue(\method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
-                TestCase::assertSame($this->expectedRepositoryDir, $dir);
+                TestCase::assertTrue(method_exists(parent::class, __FUNCTION__), parent::class . ' no more has method ' . __FUNCTION__);
+                TestCase::assertSame($this->expectedRepositoryDir, $repositoryDir);
 
                 return $this->mockPatchVersions;
             }
