@@ -17,7 +17,7 @@
     "granam/git": "2.0"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-master",
+    "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "^9.4",
     "symfony/process": "^5.1"
   },
