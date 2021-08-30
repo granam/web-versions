@@ -14,7 +14,7 @@
   },
   "require": {
     "php": ">= 7.3",
-    "granam/git": "2.0"
+    "granam/git": "^2.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
