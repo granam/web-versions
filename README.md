@@ -6,8 +6,8 @@ Originally created for a cache invalidation using a Git version as a cache key (
 
 ## Caveats
 
-- Minor versions are read only from Git branches, filtered for those named version-like (v1.0 or 1.0)
-- Patch versions are read only from Git tags, filtered for those named version-like
+- **Minor** versions reads only from Git **branches**, filtered for those named version-like (`v1.0` or `1.0`)
+- **Patch** versions reads only from Git **tags**, filtered for those named version-like (`v1.0.0` or `1.0.0`)
 
 # Usage
 
